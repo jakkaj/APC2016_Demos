@@ -13,6 +13,7 @@ using ImageSearch.Model.BingSearch;
 using Microsoft.ProjectOxford.Vision;
 using Microsoft.ProjectOxford.Vision.Contract;
 using System.IO;
+using ImageSearch.Contract;
 using Plugin.Media;
 using Plugin.Media.Abstractions;
 
@@ -20,10 +21,12 @@ namespace ImageSearch.ViewModel
 {
     public class ImageSearchViewModel
     {
+        private readonly IImageTools _imageTools;
         public ObservableRangeCollection<ImageResult> Images { get; }
 
-        public ImageSearchViewModel()
+        public ImageSearchViewModel(IImageTools imageTools)
         {
+            _imageTools = imageTools;
             Images = new ObservableRangeCollection<ImageResult>();
         }
         
@@ -133,6 +136,7 @@ namespace ImageSearch.ViewModel
         {
             MediaFile file = null;
             await CrossMedia.Current.Initialize();
+            
 
             if (UseCamera)
             {
@@ -140,7 +144,8 @@ namespace ImageSearch.ViewModel
                 {
                     Directory = "Samples",
                     Name = "test.jpg",
-                    SaveToAlbum = true
+                    SaveToAlbum = false
+                    
                 });
             }
             else
@@ -152,8 +157,17 @@ namespace ImageSearch.ViewModel
                 await UserDialogs.Instance.AlertAsync("No Photo Taken", "Analysis Result");
             else
             {
-                var description = await GetImageDescription(file.GetStream());
-                await UserDialogs.Instance.AlertAsync(description, "Analysis Result");
+                using (var stream = file.GetStream())
+                {
+                    byte[] bytes = new byte[stream.Length];
+                    await stream.ReadAsync(bytes, 0, bytes.Length);
+                    var adjusted = _imageTools.MaxResizeImage(bytes, 1024, 768);
+                    using (var ms = new MemoryStream(adjusted))
+                    {
+                        var description = await GetImageDescription(ms);
+                        await UserDialogs.Instance.AlertAsync(description, "Analysis Result");
+                    }
+                }
             }       
         }
     }

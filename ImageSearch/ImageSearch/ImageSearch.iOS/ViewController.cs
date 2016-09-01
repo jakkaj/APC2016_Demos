@@ -19,7 +19,7 @@ namespace ImageSearch.iOS
         public override void ViewDidLoad()
         {
             base.ViewDidLoad();
-            viewModel = new ImageSearchViewModel();
+            viewModel = new ImageSearchViewModel(new ImageTools());
 
             CollectionViewImages.WeakDataSource = this;
             CollectionViewImages.AllowsSelection = true;

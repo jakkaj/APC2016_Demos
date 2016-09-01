@@ -33,6 +33,7 @@
     <ConsolePause>false</ConsolePause>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Contract\IImageTools.cs" />
     <Compile Include="Services\BingSearch\Image.cs" />
     <Compile Include="Services\BingSearch\SearchResult.cs" />
     <Compile Include="Services\BingSearch\Suggestion.cs" />
